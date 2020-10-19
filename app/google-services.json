@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "405592782003",
+    "firebase_url": "https://kotlinuberremake-1bfbb.firebaseio.com",
+    "project_id": "kotlinuberremake-1bfbb",
+    "storage_bucket": "kotlinuberremake-1bfbb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405592782003:android:f8b412df4a4fd6ea9d2cc6",
+        "android_client_info": {
+          "package_name": "com.example.kotlinuberremake"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "405592782003-3mqk7eamrlh40i4okefvb9bhhm11akgh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0CENhkHAbbE3dK0wXGbb3-r58M9F4g7c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "405592782003-3mqk7eamrlh40i4okefvb9bhhm11akgh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -92,7 +92,6 @@ class SplashScreenActivity : AppCompatActivity()
 
             if (user != null)
             {
-//                Toast.makeText(this@SplashScreenActivity , "Welcome"+ user .uid , Toast.LENGTH_LONG).show()
 
                 checkUserFromFirebase()
                 Log.d(TAG, "init :  listener")
@@ -248,7 +247,8 @@ class SplashScreenActivity : AppCompatActivity()
     }
 
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOGIN_REQUEST_CODE)
@@ -265,21 +265,4 @@ class SplashScreenActivity : AppCompatActivity()
         }
     }
 
-    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
-    {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == LOGIN_REQUEST_CODE)
-        {
-            val response = IdpResponse.fromResultIntent(data)
-
-            if (requestCode == Activity.RESULT_OK)
-            {
-                val user = FirebaseAuth.getInstance().currentUser
-            }
-            else
-                Toast.makeText(this@SplashScreenActivity , ""+ response!!.error!!.message , Toast.LENGTH_SHORT).show()
-
-        }
-    }*/
 }

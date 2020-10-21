@@ -83,7 +83,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-      companion object{
+      companion object
+      {
         private const val REQUSET_CKECKE_CODE =8989
     }
 
@@ -95,7 +96,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         super.onDestroy()
     }
 
-    override fun onResume() {
+    override fun onResume()
+    {
         super.onResume()
         registerOnlineSystem()
     }
@@ -205,7 +207,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    override fun onMapReady(googleMap: GoogleMap?) {
+    override fun onMapReady(googleMap: GoogleMap?)
+    {
         mMap = googleMap!!
 
         // Request permission
@@ -278,7 +281,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     }
 
-    private fun getLocation() {
+    private fun getLocation()
+    {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -317,7 +321,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun startLocationUpdates() {
+    private fun startLocationUpdates()
+    {
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION

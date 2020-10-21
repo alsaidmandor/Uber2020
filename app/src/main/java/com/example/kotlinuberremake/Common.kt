@@ -5,6 +5,7 @@ import com.example.kotlinuberremake.model.DriverInfoModel
 object Common
 {
 
+    const val DRIVERS_LOCATION_REFERENCE: String = "DriversLocation"
     var currentUser: DriverInfoModel?= null
-    val DRIVER_INFO_REFERENCE: String = "DriverInfo"
+    const val DRIVER_INFO_REFERENCE: String = "DriverInfo"
 }

@@ -18,7 +18,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.kotlinuberremake.Common
 import com.example.kotlinuberremake.R
+import com.firebase.geofire.GeoFire
+import com.firebase.geofire.GeoLocation
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -31,6 +34,9 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -54,6 +60,29 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var  result: Task<LocationSettingsResponse>
     private lateinit var  resolvableApiException:ResolvableApiException
 
+    // online system
+     private  lateinit var onlineRef: DatabaseReference
+     private  lateinit var currentUserRef: DatabaseReference
+     private  lateinit var driversLocationRef: DatabaseReference
+     private  lateinit var geoFire: GeoFire
+
+    private  val onlineValueEventListener = object:ValueEventListener
+    {
+        override fun onDataChange(snapshot: DataSnapshot)
+        {
+            if (snapshot.exists())
+            {
+                currentUserRef.onDisconnect().removeValue()
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError)
+        {
+            mapFragment.view?.let { Snackbar.make(it, error.message , Snackbar.LENGTH_LONG).show() }
+        }
+
+    }
+
       companion object{
         private const val REQUSET_CKECKE_CODE =8989
     }
@@ -61,14 +90,23 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     override fun onDestroy()
     {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback)
+        geoFire.removeLocation(FirebaseAuth.getInstance().currentUser!!.uid)
+        onlineRef.removeEventListener(onlineValueEventListener)
         super.onDestroy()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onResume() {
+        super.onResume()
+        registerOnlineSystem()
+    }
+
+    private fun registerOnlineSystem()
+    {
+      onlineRef.addValueEventListener(onlineValueEventListener)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater,container: ViewGroup?,savedInstanceState: Bundle?): View?
+    {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
 
@@ -82,6 +120,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private fun init()
     {
+        onlineRef = FirebaseDatabase.getInstance().reference.child(".info/connected")
+        driversLocationRef= FirebaseDatabase.getInstance().reference.child(Common.DRIVERS_LOCATION_REFERENCE)
+        currentUserRef= FirebaseDatabase.getInstance().reference.child(Common.DRIVERS_LOCATION_REFERENCE)
+            .child(FirebaseAuth.getInstance().currentUser!!.uid)
+
+        geoFire= GeoFire(driversLocationRef)
+
+        registerOnlineSystem()
+
         createLocationRequest()
 
         locationCallback = object:LocationCallback()
@@ -96,18 +143,30 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 )
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPos, 18f))
 
+                // Update location
+                geoFire.setLocation(
+                    FirebaseAuth.getInstance().currentUser!!.uid ,
+                    GeoLocation(    locationRequest!!.lastLocation.latitude, locationRequest!!.lastLocation.longitude)
+                ){
+                    key: String?, error: DatabaseError? ->
+                    if (error != null)
+                    {
+                        Snackbar.make(mapFragment.requireView() , error.message , Snackbar.LENGTH_LONG).show()
+                    }
+                    else
+                    {
+
+                        Snackbar.make(mapFragment.requireView() , "you're online !" , Snackbar.LENGTH_LONG).show()
+                    }
+                }
             }
         }
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
-        /*fusedLocationProviderClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.myLooper()
-        )*/
         startLocationUpdates()
 
+        // for enable to turn on Gbs
         builder = LocationSettingsRequest.Builder()
             .addLocationRequest(locationRequest)
 
@@ -118,7 +177,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             try {
 
             task.getResult(ApiException::class.java)
-            }catch (e:ApiException)
+            }
+            catch (e:ApiException)
             {
                 when(e.statusCode)
                 {
@@ -156,8 +216,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
                     Toast.makeText(context!!, "Clicked Button", Toast.LENGTH_LONG).show()
                     // Enable Button
-                    if(ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                        ActivityCompat.requestPermissions(requireContext() as Activity, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),100)
+                    if(ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+                        ActivityCompat.requestPermissions(requireContext() as Activity, arrayOf( Manifest.permission.ACCESS_FINE_LOCATION),100)
                     }else{
                         mMap.isMyLocationEnabled = true
 
@@ -281,32 +341,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 locationCallback,
                 Looper.getMainLooper()
             )
-            /*            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location)
-                        {
-                            // Got last known location. In some rare situations this can be null.
-                            if (location != null)
-                            {
-                                // Logic to handle location object
-                                LatLng home = new LatLng(location.getLatitude(), location.getLongitude());
-                                mMap.addMarker(
-                                        new MarkerOptions()
-                                                .position(home)
-                                                .title("Marker in Home"))
-                                        .setDraggable(true);
-             */
-            /*                   mMap.moveCamera(
-                                        CameraUpdateFactory.newLatLngZoom(home, 17.0f)
-                                );*/
-            /*
-                                mMap.animateCamera(
-                                        CameraUpdateFactory.newLatLngZoom(home, 17.0f)
-                                );
-                            }
-                        }
-                    });*/
+
         }
     }
 

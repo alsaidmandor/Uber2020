@@ -65,9 +65,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:19.5.0'
 
     // Dexter
-    implementation 'com.karumi:dexter:6.1.2'
+    implementation 'com.karumi:dexter:6.2.1'
 
     // location
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.1.0'
+
+    //Geofire
+    implementation 'com.firebase:geofire-android:3.0.0'
+
 
 }
